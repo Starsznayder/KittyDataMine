@@ -2,7 +2,7 @@ find_package(Threads REQUIRED)
 find_package(Boost COMPONENTS system REQUIRED
                               program_options REQUIRED)
                               
-file(GLOB_RECURSE kittySources "*.cpp")
+file(GLOB_RECURSE kittySources "*.cpp" "*.h")
                               
 add_executable(dataMiner ${kittySources})
 
