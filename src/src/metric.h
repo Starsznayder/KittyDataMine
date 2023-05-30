@@ -6,7 +6,7 @@
 
 template <typename T>
 struct Metric {
-    virtual float operator()(T left, T right)=0;
+    virtual float operator()(T left, T right) = 0;
 };
 
 struct ValueDifference : public Metric<uint8_t> {

@@ -1,35 +1,49 @@
+#ifndef KnnH
+#define KnnH
+
 #include <cstdio>
 #include <vector>
 #include <numeric>
 #include <memory>
 #include <algorithm>
 #include <limits>
+
 #include "metric.h"
+#include "observation.h"
 
 template <typename T>
-std::vector<T> nearest_neighbours(Metric<T>& metric,
-                                  std::vector<T>& dataset,
-                                  T element,
-                                  size_t k) {
+std::vector<Observation<T>> nearest_neighbours(const Metric<T>& metric,
+                                               const std::vector<Observation<T>>& dataset,
+                                               const T element,
+                                               const size_t k) {
+
     std::vector<float> distances(k, std::numeric_limits<float>::infinity());
-    std::vector<T> neighbours(k);
+    std::vector<Observation<T>> neighbours(k);
 
     for(auto& new_ngbr : dataset) {
-        float new_dist = metric(new_ngbr, element);
+        float new_dist = metric(new_ngbr.data, element);
         size_t i = 0;
-        while(i < k && new_dist < distances[i]) ++i; // --i;
+        while(i < k && new_dist < distances[i]) ++i; 
         while(i > 0) {
-            i--;
+            --i;
             std::swap(distances[i], new_dist);
-            std::swap(neighbours[i], new_ngbr);  
+            std::swap(neighbours[i], new_ngbr); 
         }
-        // for(size_t i = 0; i < k; ++i) { 
-        //     float& old_dist = distances[i];
-        //     T& old_ngbr = neighbours[i];
-        //     if (old_dist < new_dist) break;
-        //     std::swap(old_dist, new_dist);
-        //     std::swap(old_ngbr, new_ngbr);
-        // }
     }
     return neighbours;
 }
+
+template <typename T>
+uint8_t knn(const Metric<T>& metric,
+	 		const std::vector<Observation<T>>& dataset, 
+			const T element, 
+			const size_t k,
+			const size_t number_of_classes) {
+	auto neighbours = nearest_neighbours(metric, dataset, element, k);
+	std::vector<uint8_t> targets;
+	std::transform(neighbours.begin(), neighbours.end(), std::back_inserter(targets),
+		[](Observation<T> obs){ return obs.target; });
+	return mode(targets, number_of_classes); 
+}
+
+#endif
