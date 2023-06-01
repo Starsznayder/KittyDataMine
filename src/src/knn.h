@@ -8,20 +8,22 @@
 #include <algorithm>
 #include <limits>
 
+#include "utils.h"
 #include "metric.h"
 #include "observation.h"
 
 template <typename T>
-std::vector<Observation<T>> nearest_neighbours(const Metric<T>& metric,
+std::vector<const Observation<T> *> nearest_neighbours(const Metric<T>& metric,
                                                const std::vector<Observation<T>>& dataset,
-                                               const T element,
+                                               const T& element,
                                                const size_t k) {
 
     std::vector<float> distances(k, std::numeric_limits<float>::infinity());
-    std::vector<Observation<T>> neighbours(k);
-
-    for(auto& new_ngbr : dataset) {
-        float new_dist = metric(new_ngbr.data, element);
+    std::vector<const Observation<T> *> neighbours(k);
+    
+    for(auto it = dataset.begin(); it != dataset.end(); ++it) {
+        auto new_ngbr = &(*it);
+        float new_dist = metric(new_ngbr->data, element);
         size_t i = 0;
         while(i < k && new_dist < distances[i]) ++i; 
         while(i > 0) {

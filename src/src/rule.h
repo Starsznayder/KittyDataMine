@@ -16,9 +16,9 @@ struct Rule {
 		: decision(decision), metric(metric), alpha(alpha), beta(beta) {	
 		distance = metric(alpha, beta);
 	}
-	bool operator()(const T& gamma) {	
+	bool operator()(const T& gamma) const {	
 		return metric(gamma, alpha) <= distance && metric(gamma, beta) <= distance;
 	}
-}
+};
 
 #endif

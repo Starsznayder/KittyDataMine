@@ -3,14 +3,13 @@
 
 #include <cstdio>
 #include <vector>
-#include <numeric>
+#include <numeric> // this has reduce inside;
 #include <memory>
 #include <algorithm>
 
-
 template <typename T>
 struct Metric {
-    virtual float operator()(T left, T right) = 0;
+    virtual float operator()(const T& left, const T& right) const=0;
 };
 
 
@@ -18,7 +17,8 @@ struct ValueDifference : public Metric<uint8_t> {
 
     std::vector<std::vector<float>> distances;
 
-    ValueDifference(std::vector<uint8_t>& cls, std::vector<uint8_t>& vec) : distances() {
+    ValueDifference(const std::vector<uint8_t>& cls,
+                    const std::vector<uint8_t>& vec) : distances() {
         uint8_t len_cls = *std::max_element(cls.begin(), cls.end()) + 1; 
         uint8_t len_vec = *std::max_element(vec.begin(), vec.end()) + 1;
         
@@ -45,28 +45,68 @@ struct ValueDifference : public Metric<uint8_t> {
                     distances[i][j] += std::abs(prob[i][c] - prob[j][c]);
     }
 
-    float operator()(uint8_t left, uint8_t right) { 
+    float operator()(const uint8_t& left,
+                     const uint8_t& right) const { 
         return distances[left][right];
     }
 };
 
 
-struct Manhattan : public Metric<float> {
-    
-    float operator()(float left, float right) {
+struct AbsoluteDifference : public Metric<float> {
+    float operator()(const float& left,
+                     const float& right) const {
         return std::abs(left - right); 
     }
 };
 
 
-template <typename... Types>
-struct Max : public Metric<std::tuple<Types...>> {
-	std::tuple<Metric<Types>...> metrics;
-	Max(std::tuple<Metric<Types>...> metrics) : metrics(metrics) {}
-	float operator()(std::tuple<Types...> left,
-				     std::tuple<Types...> right) {
-		return *std::max_element(
-	}
+// -------------------- TUPLES ------------------- //
+template <typename M, typename T>
+float compute_metric(const M& metric, const T& lhs, const T& rhs) {
+	return metric(lhs, rhs);	
 }
+
+template <typename ...Ms, typename ...As, size_t ...Is>
+std::array<float, sizeof...(Is)> compute_metrics_helper(const std::tuple<Ms...>& metrics,
+                                                        const std::tuple<As...>& lhss,
+                                                        const std::tuple<As...>& rhss,
+                                                        const std::index_sequence<Is...>) {
+	// return std::make_tuple(
+    return { compute_metric(std::get<Is>(metrics),
+							std::get<Is>(lhss),
+                            std::get<Is>(rhss))... };
+}
+
+template <typename ...Ms, typename ...Ts>
+std::array<float, sizeof...(Ms)> compute_metrics(const std::tuple<Ms...>& metrics,
+		                                         const std::tuple<Ts...>& lhss,
+                                                 const std::tuple<Ts...>& rhss) {
+	static_assert(sizeof...(Ms) == sizeof...(Ts), "wrong sizes");
+	return compute_metrics_helper(metrics, lhss, rhss, std::make_index_sequence<sizeof...(Ts)>());
+}
+
+
+template <typename MetTypes, typename ArgTypes>
+struct Max : public Metric<ArgTypes> {
+    MetTypes& metrics;
+    Max(MetTypes& metrics) : metrics(metrics) {}
+	float operator()(const ArgTypes& lhss,
+				     const ArgTypes& rhss) const {
+        auto diffs = compute_metrics(metrics, lhss, rhss);
+		return *std::max_element(diffs.begin(), diffs.end());
+	}
+};
+
+template <typename MetTypes, typename ArgTypes>
+struct Manhattan : public Metric<ArgTypes> {
+    MetTypes& metrics; 
+    Manhattan(MetTypes& metrics) : metrics(metrics) {}
+    float operator()(const ArgTypes& lhss,
+                     const ArgTypes& rhss) const {
+        auto diffs = compute_metrics(metrics, lhss, rhss);
+        return std::reduce(diffs.begin(), diffs.end());
+    }
+};
+
 
 #endif
