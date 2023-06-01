@@ -4,12 +4,12 @@
 
 template <typename T>
 struct Metric {
-	float operator()(T arg);
+	virtual float operator()(T arg)=0;
 };
 
 struct A : Metric<int> {
 	float operator()(int arg) {
-		return (float) 2*arg;
+		return (float) 2 * arg;
 	}
 };
 
@@ -19,40 +19,56 @@ struct B : Metric<float> {
 	}
 };
 
-template <typename T>
-float compute_metric(Metric<T>& metric, T& arg) {
+template <typename M, typename T>
+float compute_metric(M metric, T arg) {
 	return metric(arg);	
 }
 
-template <typename ...Ts, size_t ...Is>
-auto compute_metrics(
+template <typename ...Ms, typename ...As, size_t ...Is>
+auto compute_metrics_helper(std::tuple<Ms...> metrics, std::tuple<As...> args, std::index_sequence<Is...>) {
+	return std::make_tuple(compute_metric(std::get<Is>(metrics),
+									      std::get<Is>(args))...);
+}
 
-template <typename ...Ts> 
-struct Apply {
-	std::tuple<Metric<Ts>...> metrics;
-	Apply(std::tuple<Metric<Ts>...> metrics) : metrics(metrics) {}
-		
-	auto operator()(std::tuple<Ts...> input) {
-		return std::make_tuple(std::get<N>(metrics)(std::get<N>(input))...);
-	}
-};
+template <typename ...Ms, typename ...Ts>
+auto compute_metrics(std::tuple<Ms...> metrics,
+		             std::tuple<Ts...> args) {
+	static_assert(sizeof...(Ms) == sizeof...(Ts), "wrong sizes");
+	return compute_metrics_helper(metrics, args, std::make_index_sequence<sizeof ...(Ts)>());
+}
+
+// template <typename ...Ts> 
+// struct Apply {
+// 	std::tuple<Metric<Ts>...> metrics;
+// 	Apply(std::tuple<Metric<Ts>...> metrics) : metrics(metrics) {}
+// 		
+// 	auto operator()(std::tuple<Ts...> input) {
+// 		return std::make_tuple(std::get<N>(metrics)(std::get<N>(input))...);
+// 	}
+// };
 
 
 int main() {
+
+
+	A m_int; 
+	B m_float; 
 	
+	int a_int = 3; 
+	float a_float = 4.0;
+
 	auto ms = std::make_tuple(
-		Metric<int>(), 
-		Metric<float>()
+		m_int, m_float
 	);
 
 	auto ar = std::make_tuple(
-		(int) 3,
-		(float) 4.0 
+		a_int, 
+		a_float
 	);
 
-	Apply<int, float> apl(ms);
+    //Apply<int, float> apl(ms);
 
-	std::tuple<float, float> res = apl(ar);	
+	std::tuple<float, float> res = compute_metrics(ms, ar);	
 	
 	printf("%f\n", std::get<0>(res));
 	printf("%f\n", std::get<1>(res));
