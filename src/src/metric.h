@@ -1,13 +1,18 @@
+#ifndef MetricH
+#define MetricH
+
 #include <cstdio>
 #include <vector>
 #include <numeric>
 #include <memory>
 #include <algorithm>
 
+
 template <typename T>
 struct Metric {
     virtual float operator()(T left, T right) = 0;
 };
+
 
 struct ValueDifference : public Metric<uint8_t> {
 
@@ -45,9 +50,23 @@ struct ValueDifference : public Metric<uint8_t> {
     }
 };
 
+
 struct Manhattan : public Metric<float> {
     
     float operator()(float left, float right) {
         return std::abs(left - right); 
     }
 };
+
+
+template <typename... Types>
+struct Max : public Metric<std::tuple<Types...>> {
+	std::tuple<Metric<Types>...> metrics;
+	Max(std::tuple<Metric<Types>...> metrics) : metrics(metrics) {}
+	float operator()(std::tuple<Types...> left,
+				     std::tuple<Types...> right) {
+		return *std::max_element(
+	}
+}
+
+#endif

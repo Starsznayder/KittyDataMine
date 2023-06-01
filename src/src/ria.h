@@ -1,3 +1,6 @@
+#ifndef RiaH
+#define RiaH
+
 #include <cstdio>
 #include <vector>
 #include <numeric>
@@ -9,6 +12,7 @@
 #include "observation.h"
 #include "utils.h"
 
+
 template <typename T> 
 bool is_consistent(const Rule<T>& rule, const std::vector<Observation<T>> verify_set) {
 	for(auto& obs : verify_set)
@@ -16,7 +20,6 @@ bool is_consistent(const Rule<T>& rule, const std::vector<Observation<T>> verify
 			return false;
 	return true;	
 }
-
 
 template <typename T>
 uint8_t ria(const Metric<T>& metric,
@@ -30,3 +33,5 @@ uint8_t ria(const Metric<T>& metric,
 			++support_set[static_cast<int>(observation.target)];
 	return mode(support_set_count);
 }
+
+#endif

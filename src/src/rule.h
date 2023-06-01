@@ -1,5 +1,5 @@
-#ifndef MetricH
-#define MetricH
+#ifndef RuleH
+#define RuleH 
 
 #include <memory>
 #include "metric.h"
