@@ -5,7 +5,7 @@ find_package(Boost COMPONENTS system REQUIRED
 file(GLOB_RECURSE kittySources "*.cpp" "*.h")
                               
 add_executable(dataMiner ${kittySources})
-
+add_compile_options("std=c++17")
 target_include_directories(dataMiner PRIVATE .)
 target_link_libraries(dataMiner Boost::program_options Boost::system)
 

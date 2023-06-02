@@ -2,11 +2,12 @@
 #define DATASETPARSER_H
 
 #include <sstream>
+#include <iostream>
 #include <string>
 #include <fstream>
 #include <memory>
 #include <vector>
-#include <limits>
+#include <tuple>
 #include <boost/algorithm/string/replace.hpp>
 
 enum class DataSets: uint8_t
@@ -14,110 +15,87 @@ enum class DataSets: uint8_t
     HORSE = 0
 };
 
-enum class ParameterType : uint8_t
-{
-    LINEAR = 0,
-    SYMBOLIC = 1,
-    TARGET = 2,
-    IGNORED = 3
-};
-
 template<DataSets T>
-struct DataSetsParameters {};
+struct DataSetsParameters
+{
+    static constexpr char* path = "\0";
+    using DataType = std::tuple<>;
+};
 
 template<>
 struct DataSetsParameters<DataSets::HORSE>
 {
     static constexpr char* path = "/home/kot/Pobrane/horse-colic.data";
-    static const inline std::vector<ParameterType> fieldMap = {ParameterType::SYMBOLIC,
-                                                      ParameterType::SYMBOLIC,
-                                                      ParameterType::LINEAR,
-                                                      ParameterType::LINEAR,
-                                                      ParameterType::LINEAR,
-                                                      ParameterType::LINEAR,
-                                                      ParameterType::SYMBOLIC,
-                                                      ParameterType::SYMBOLIC,
-                                                      ParameterType::SYMBOLIC,
-                                                      ParameterType::SYMBOLIC,
-                                                      ParameterType::SYMBOLIC,
-                                                      ParameterType::SYMBOLIC,
-                                                      ParameterType::SYMBOLIC,
-                                                      ParameterType::SYMBOLIC,
-                                                      ParameterType::SYMBOLIC,
-                                                      ParameterType::LINEAR,
-                                                      ParameterType::SYMBOLIC,
-                                                      ParameterType::SYMBOLIC,
-                                                      ParameterType::LINEAR,
-                                                      ParameterType::LINEAR,
-                                                      ParameterType::SYMBOLIC,
-                                                      ParameterType::LINEAR,
-                                                      ParameterType::SYMBOLIC};
+
+    struct Types
+    {
+        using DataType = std::tuple<uint8_t, //ParameterType::SYMBOLIC,
+                                    uint8_t, //ParameterType::SYMBOLIC,
+                                    float, //ParameterType::LINEAR,
+                                    float, //ParameterType::LINEAR,
+                                    float, //ParameterType::LINEAR,
+                                    float, //ParameterType::LINEAR,
+                                    uint8_t, //ParameterType::SYMBOLIC,
+                                    uint8_t, //ParameterType::SYMBOLIC,
+                                    uint8_t, //ParameterType::SYMBOLIC,
+                                    uint8_t, //ParameterType::SYMBOLIC,
+                                    uint8_t, //ParameterType::SYMBOLIC,
+                                    uint8_t, //ParameterType::SYMBOLIC,
+                                    uint8_t, //ParameterType::SYMBOLIC,
+                                    uint8_t, //ParameterType::SYMBOLIC,
+                                    uint8_t, //ParameterType::SYMBOLIC,
+                                    float, //ParameterType::LINEAR,
+                                    uint8_t, //ParameterType::SYMBOLIC,
+                                    int8_t, //ParameterType::SYMBOLIC,
+                                    float, //ParameterType::LINEAR,
+                                    float, //ParameterType::LINEAR,
+                                    uint8_t, //ParameterType::SYMBOLIC,
+                                    float, //ParameterType::LINEAR,
+                                    uint8_t>; //ParameterType::SYMBOLIC>;
+    };
 };
 
-template<DataSets T>
-struct Statistics
-{
-    struct Minmax
-    {
-        std::vector<float> minOfFields;
-        std::vector<float> maxOfFields;
-
-        Minmax(unsigned size) : minOfFields(size), maxOfFields(size)
-        {
-            std::fill(minOfFields.begin(), minOfFields.end(), std::numeric_limits<float>::max());
-            std::fill(maxOfFields.begin(), maxOfFields.end(), std::numeric_limits<float>::min());
-        }
+template <typename... Args>
+void printImpl(const Args&... tupleArgs) {
+    size_t index = 0;
+    auto printElem = [&index](const auto& x) {
+        if (index++ > 0)
+            std::cout << ", ";
+        std::cout << x;
     };
 
-    static std::vector<std::vector<unsigned>> getNumberOfOccurrences(const std::vector<float>& vec, const Minmax& minmax)
+    (printElem(tupleArgs), ...);
+}
+
+template<size_t I = 0, typename... Tp>
+void setTuple(std::tuple<Tp...>& t, const std::vector<std::string>& vstrings, int& i)
+{
+    std::get<I>(t) = std::stof(vstrings[i++]);
+    if constexpr(I+1 != sizeof...(Tp))
     {
-        std::vector<std::vector<unsigned>> stat(DataSetsParameters<T>::fieldMap.size());
-        std::vector<int> symbolicFieldsList;
-        for (unsigned j = 0; j < DataSetsParameters<T>::fieldMap.size(); ++j)
-        {
-            if (DataSetsParameters<T>::fieldMap[j] == ParameterType::SYMBOLIC)
-            {
-                symbolicFieldsList.push_back(j);
-                stat[j] = std::vector<unsigned>(static_cast<int>(minmax.maxOfFields[j]) + 1);
-            }
-        }
-
-        for (unsigned i = 0; i < vec.size(); i += DataSetsParameters<T>::fieldMap.size())
-        {
-            for (unsigned j = 0; j < symbolicFieldsList.size(); ++j)
-            {
-                const int fieldIdx = symbolicFieldsList[j];
-                const int value = static_cast<int>(vec[i + fieldIdx]);
-                ++stat[fieldIdx][value];
-            }
-        }
-        return stat;
+        setTuple<I+1>(t, vstrings, i);
     }
+}
 
-    static Minmax getMinimumAndMaximumValues(const std::vector<float>& vec)
+template<size_t I = 0, typename... Tp>
+void printTuple(std::tuple<Tp...>& t) {
+    std::cout << static_cast<float>(std::get<I>(t)) << " ";
+    if constexpr(I+1 != sizeof...(Tp))
     {
-        Minmax output(DataSetsParameters<T>::fieldMap.size());
-        for (unsigned i = 0; i < vec.size(); i += DataSetsParameters<T>::fieldMap.size())
-        {
-            for (unsigned j = 0; j < DataSetsParameters<T>::fieldMap.size(); ++j)
-            {
-                output.minOfFields[j] = std::min(output.minOfFields[j], vec[i + j]);
-                output.maxOfFields[j] = std::max(output.maxOfFields[j], vec[i + j]);
-            }
-        }
-        return output;
+        printTuple<I+1>(t);
     }
-};
+}
 
-template<DataSets T>
+template<typename T>
 class DataSetParser
 {
 public:
-    static std::shared_ptr<std::vector<float>> readFile()
+    static std::shared_ptr<std::vector<typename T::Types::DataType>> readFile()
     {
-        std::shared_ptr<std::vector<float>> out = std::make_shared<std::vector<float>>(0);
+        std::shared_ptr<std::vector<typename T::Types::DataType>> out = std::make_shared<std::vector<typename T::Types::DataType>>(0);
+        static const size_t numberOfTupleMembers = std::tuple_size<typename T::Types::DataType>::value;
 
-        std::ifstream file(DataSetsParameters<T>::path);
+        std::ifstream file(T::path);
         std::string value;
         while (std::getline(file, value))
         {
@@ -128,15 +106,17 @@ public:
             std::istream_iterator<std::string> begin(ss);
             std::istream_iterator<std::string> end;
             std::vector<std::string> vstrings(begin, end);
-            if (vstrings.size() < DataSetsParameters<T>::fieldMap.size())
+            std::string* ptr = vstrings.data();
+            if (vstrings.size() < numberOfTupleMembers)
             {
                 std::cerr << "Invalid data file!" << std::endl;
                 throw;
             }
-            for (unsigned i = 0; i < std::min(vstrings.size(), DataSetsParameters<T>::fieldMap.size()); ++i)
-            {
-                out->push_back(std::stof(vstrings[i]));
-            }
+            typename T::Types::DataType tmp;
+            int i = 0;
+
+            setTuple(tmp, vstrings, i);
+            out->push_back(tmp);
         }
 
         return out;

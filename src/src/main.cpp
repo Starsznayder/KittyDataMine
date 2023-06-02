@@ -99,8 +99,8 @@ void test_knn_Tuples_Manhattan() {
 
 }
 
-int main() {
+/*int main() { // może być tylko 1 main w targecie
     test_knn_Tuples_Max();
     test_knn_Tuples_Manhattan();
-}
+}*/
 

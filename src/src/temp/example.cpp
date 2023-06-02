@@ -1,4 +1,4 @@
-#include <cstdio>
+#include <iostream>
 #include <tuple>
 #include <functional>
 
@@ -47,8 +47,8 @@ auto compute_metrics(std::tuple<Ms...> metrics,
 // 	}
 // };
 
-
-int main() {
+//nie może być więcej niż  jeden main na target w cmake
+/*int main() {
 
 
 	A m_int; 
@@ -69,9 +69,8 @@ int main() {
     //Apply<int, float> apl(ms);
 
 	std::tuple<float, float> res = compute_metrics(ms, ar);	
-	
-	printf("%f\n", std::get<0>(res));
-	printf("%f\n", std::get<1>(res));
+    std::cout << std::get<0>(res) << std::endl;
+    std::cout << std::get<1>(res) << std::endl;
 
 	return 0;
-}
+}*/
