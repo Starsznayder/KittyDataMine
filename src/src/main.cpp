@@ -1,6 +1,8 @@
 #include <cstdio>
 #include <memory>
 #include "knn.h"
+#include "ria.h"
+// #include "riona.h"
 #include "observation.h"
 
 void test_ValueDifferenceMetric() {
@@ -29,8 +31,8 @@ void test_knn_VDM() {
 
     auto nn = nearest_neighbours(metric, dataset, (uint8_t) 3, (size_t) 2);
     
-    printf("%d\n", nn[0]->data); 
-    printf("%d\n", nn[1]->data); 
+    printf("%d\n", nn[0].data); 
+    printf("%d\n", nn[1].data); 
 }
 
 void test_knn_Tuples_Max() {
@@ -61,8 +63,8 @@ void test_knn_Tuples_Max() {
         2
     );
 
-    printf("%d\n", std::get<0>(nn[0]->data));
-    printf("%d\n", std::get<0>(nn[1]->data));
+    printf("%d\n", std::get<0>(nn[0].data));
+    printf("%d\n", std::get<0>(nn[1].data));
 
 }
 
@@ -94,13 +96,87 @@ void test_knn_Tuples_Manhattan() {
         2
     );
 
-    printf("%d\n", std::get<0>(nn[0]->data));
-    printf("%d\n", std::get<0>(nn[1]->data));
+    printf("%d\n", std::get<0>(nn[0].data));
+    printf("%d\n", std::get<0>(nn[1].data));
 
 }
 
-/*int main() { // może być tylko 1 main w targecie
+
+void test_ria() {
+
+    printf("\nRia TEST\n");
+    
+    std::vector<uint8_t> cls = {1,1,1};
+    std::vector<std::tuple<uint8_t, float>> vec = {
+        {1, 1.0},
+        {2, 2.0},
+        {3, 0.0}
+    };
+    
+    std::vector<Observation<std::tuple<uint8_t, float>>> dataset;
+    for(size_t i = 0; i < cls.size(); ++i) {
+        Observation<std::tuple<uint8_t, float>> obs(cls[i], vec[i]);
+        dataset.push_back(obs);
+    }
+
+    std::vector<uint8_t> v = {1, 2, 3};
+
+    auto metup = std::make_tuple(ValueDifference{cls, v}, AbsoluteDifference{});
+    auto tst   = std::make_tuple((uint8_t) 3, (float) 3.0);
+
+    Max<decltype(metup), decltype(tst)> metric(metup);
+
+    auto result = ria(
+        metric,
+        dataset,
+        tst,
+        2
+    );
+
+    printf("%d\n", result);
+
+    
+}
+
+void test_riona() {
+
+    printf("\nRiona TEST\n");
+    
+    std::vector<uint8_t> cls = {1,1,1};
+    std::vector<std::tuple<uint8_t, float>> vec = {
+        {1, 1.0},
+        {2, 2.0},
+        {3, 0.0}
+    };
+    
+    std::vector<Observation<std::tuple<uint8_t, float>>> dataset;
+    for(size_t i = 0; i < cls.size(); ++i) {
+        Observation<std::tuple<uint8_t, float>> obs(cls[i], vec[i]);
+        dataset.push_back(obs);
+    }
+
+    std::vector<uint8_t> v = {1, 2, 3};
+
+    auto metup = std::make_tuple(ValueDifference{cls, v}, AbsoluteDifference{});
+    auto tst   = std::make_tuple((uint8_t) 3, (float) 3.0);
+
+    Max<decltype(metup), decltype(tst)> metric(metup);
+
+    //auto result = riona(
+    //    metric,
+    //    metric,
+    //    dataset,
+    //    tst,
+    //    2,
+    //    2
+    //);
+
+    //printf("%d\n", result);
+    
+}
+
+int main() { // może być tylko 1 main w targecie
     test_knn_Tuples_Max();
     test_knn_Tuples_Manhattan();
-}*/
-
+    test_ria();
+}

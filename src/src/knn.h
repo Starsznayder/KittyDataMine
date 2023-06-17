@@ -13,14 +13,14 @@
 #include "observation.h"
 
 template <typename T>
-std::vector<const Observation<T> *> nearest_neighbours(const Metric<T>& metric,
+std::vector<Observation<T>> nearest_neighbours(const Metric<T>& metric,
                                                const std::vector<Observation<T>>& dataset,
                                                const T& element,
                                                const size_t k) {
 
     std::vector<float> distances(k, std::numeric_limits<float>::infinity());
     std::vector<const Observation<T> *> neighbours(k);
-    
+
     for(auto it = dataset.begin(); it != dataset.end(); ++it) {
         auto new_ngbr = &(*it);
         float new_dist = metric(new_ngbr->data, element);
@@ -28,11 +28,18 @@ std::vector<const Observation<T> *> nearest_neighbours(const Metric<T>& metric,
         while(i < k && new_dist < distances[i]) ++i; 
         while(i > 0) {
             --i;
-            std::swap(distances[i], new_dist);
+            std::swap(distances[i], new_dist);         
             std::swap(neighbours[i], new_ngbr); 
         }
     }
-    return neighbours;
+    std::vector<Observation<T>> result;
+    std::transform(
+        neighbours.begin(),
+        neighbours.end(),
+        std::back_inserter(result),
+        [](const Observation<T>* n){ return *n; }
+    );
+    return result;
 }
 
 template <typename T>
@@ -42,10 +49,9 @@ uint8_t knn(const Metric<T>& metric,
 			const size_t k,
 			const size_t number_of_classes) {
 	auto neighbours = nearest_neighbours(metric, dataset, element, k);
-	std::vector<uint8_t> targets;
-	std::transform(neighbours.begin(), neighbours.end(), std::back_inserter(targets),
-		[](Observation<T> obs){ return obs.target; });
-	return mode(targets, number_of_classes); 
+    std::vector<size_t> hist(number_of_classes, 0);
+    for(auto& n : neighbours) ++hist[n.target];
+	return std::max_element(hist.begin(), hist.end()) - hist.begin();
 }
 
 #endif

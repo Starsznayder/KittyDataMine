@@ -5,9 +5,9 @@
 
 template <typename T>
 struct Observation {
-	uint8_t target; 
-	T& data; 
-    Observation(uint8_t target, T& data) : target(target), data(data) {}
+	const uint8_t target; 
+	const T& data; 
+    Observation(const uint8_t target, const T& data) : target(target), data(data) {}
 };
 
 #endif
