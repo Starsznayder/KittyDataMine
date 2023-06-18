@@ -10,9 +10,9 @@
 #include <cstring>
 #include <tuple>
 
-using IrisType = std::tuple<float, float, float, float>;
-using HabermanType = std::tuple<float, float, float>;
-using GermanType = std::tuple<
+using IrisTuple = std::tuple<float, float, float, float>;
+using HabermanTuple = std::tuple<float, float, float>;
+using GermanTuple = std::tuple<
     uint8_t,
     float,
     uint8_t,
@@ -35,6 +35,7 @@ using GermanType = std::tuple<
     uint8_t
 >;
 
+
 std::vector<std::tuple<float, float, float>> Readfile() {
     std::ifstream File("./example.csv");
     std::vector<std::tuple<float, float, float>> data;
@@ -49,33 +50,206 @@ std::vector<std::tuple<float, float, float>> Readfile() {
     return data;
 }
 
-std::tuple<std::vector<HabermanType>,
+
+std::tuple<std::vector<HabermanTuple>,
            std::vector<uint8_t>> read_haberman() {
 
     std::ifstream File("data/haberman.csv");
 
-    std::vector<HabermanType> data_vec;
+    std::vector<HabermanTuple> data_vec;
     std::vector<uint8_t> cls_vec;
 
-
-    uint8_t cls;
-    float a;
-    float b;
-    float c;
+    float cls,
+          a,
+          b,
+          c;
 
     while (File >> cls >> a >> b >> c) {
-        data_vec.push_back(HabermanType(a, b, c));
+        data_vec.push_back(HabermanTuple(a, b, c));
+        cls_vec.push_back((uint8_t) cls);
     }
     return std::make_tuple(data_vec, cls_vec);
 }
 
+
+std::tuple<std::vector<IrisTuple>,
+           std::vector<uint8_t>> read_iris() {
+
+    std::ifstream File("data/iris.csv");
+
+    std::vector<IrisTuple> data_vec;
+    std::vector<uint8_t> cls_vec;
+
+
+    float cls;
+    float d0, d1, d2, d3;
+
+    while (File >> cls >> d0 >> d1 >> d2 >> d3) {
+        data_vec.push_back(IrisTuple(d0, d1, d2, d3));
+        cls_vec.push_back((uint8_t) cls);
+    }
+    return std::make_tuple(data_vec, cls_vec);
+}
+
+
+std::tuple<std::vector<GermanTuple>,
+           std::vector<uint8_t>> read_german() {
+
+    std::ifstream File("data/german.csv");
+
+    std::vector<GermanTuple> data_vec;
+    std::vector<uint8_t> cls_vec;
+
+    float cls;
+    float d0,
+          d1, 
+          d2,
+          d3,
+          d4,
+          d5,
+          d6,
+          d7,
+          d8,
+          d9,
+          d10,
+          d11,
+          d12,
+          d13,
+          d14,
+          d15,
+          d16,
+          d17,
+          d18,
+          d19;
+    /*
+    static_cast<uint8_t>( d0;
+    float d1;
+    static_cast<uint8_t>( d2;
+    static_cast<uint8_t>( d3;
+    float d4;
+    static_cast<uint8_t>( d5;
+    static_cast<uint8_t>( d6;
+    float d7;
+    static_cast<uint8_t>( d8;
+    static_cast<uint8_t>( d9;
+    float d10;
+    static_cast<uint8_t>( d11;
+    float d12;
+    static_cast<uint8_t>( d13;
+    static_cast<uint8_t>( d14;
+    float d15;
+    static_cast<uint8_t>( d16;
+    float d17;
+    static_cast<uint8_t>( d18;
+    static_cast<uint8_t>( d19;
+    */
+
+    while (File >> cls >> 
+            d0 >>    
+            d1 >>    
+            d2 >>    
+            d3 >>    
+            d4 >>    
+            d5 >>    
+            d6 >>    
+            d7 >>    
+            d8 >>    
+            d9 >>    
+            d10 >> 
+            d11 >> 
+            d12 >> 
+            d13 >> 
+            d14 >> 
+            d15 >> 
+            d16 >> 
+            d17 >> 
+            d18 >> 
+            d19
+        ) {
+        data_vec.push_back(GermanTuple(
+        /*
+          d0,
+          d1, 
+          d2,
+          d3,
+          d4,
+          d5,
+          d6,
+          d7,
+          d8,
+          d9,
+          d10,
+          d11,
+          d12,
+          d13,
+          d14,
+          d15,
+          d16,
+          d17,
+          d18,
+          d19
+        */ 
+    (uint8_t) d0,
+    (float)   d1,
+    (uint8_t) d2,
+    (uint8_t) d3,
+    (float)   d4,
+    (uint8_t) d5,
+    (uint8_t) d6,
+    (float)   d7,
+    (uint8_t) d8,
+    (uint8_t) d9,
+    (float)   d10,
+    (uint8_t) d11,
+    (float)   d12,
+    (uint8_t) d13,
+    (uint8_t) d14,
+    (float)   d15,
+    (uint8_t) d16,
+    (float)   d17,
+    (uint8_t) d18,
+    (uint8_t) d19
+
+    /*
+    static_cast<uint8_t>(d0),
+    (float)   d1,
+    static_cast<uint8_t>(d2),
+    static_cast<uint8_t>(d3),
+    (float)   d4,
+    static_cast<uint8_t>(d5),
+    static_cast<uint8_t>(d6),
+    (float)   d7,
+    static_cast<uint8_t>(d8),
+    static_cast<uint8_t>(d9),
+    (float)   d10,
+    static_cast<uint8_t>(d11),
+    (float)   d12,
+    static_cast<uint8_t>(d13),
+    static_cast<uint8_t>(d14),
+    (float)   d15,
+    static_cast<uint8_t>(d16),
+    (float)   d17,
+    static_cast<uint8_t>(d18),
+    static_cast<uint8_t>(d19)
+    */
+        ));
+        cls_vec.push_back((uint8_t) cls);
+    }
+    return std::make_tuple(data_vec, cls_vec);
+}
 int main() {
-    auto df = read_haberman();
+    auto df = read_german();
     auto X = std::get<0>(df); 
     auto y = std::get<1>(df);
 
     for (const auto& i : X) {
-       std::cout << std::get<0>(i) << ", " << std::get<1>(i) << ", " << std::get<2>(i) << ", " << std::endl;
+       //std::cout << std::get<0>(i) << ", " << std::get<1>(i) << ", " << std::get<2>(i) << ", " << std::endl;
+       //std::cout << std::get<0>(i) << ", " << std::get<1>(i) << ", " << std::get<2>(i) << ", " << std::get<3>(i) << std::endl;
+       printf("%d\n", std::get<0>(i));
+    }
+
+    for (const auto& i : y) {
+        //printf("%d\n", i);
     }
 
     return 0;
