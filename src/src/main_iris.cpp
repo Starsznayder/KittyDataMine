@@ -1,7 +1,6 @@
 #ifndef ParserH
 #define ParserH
 
-#include <iostream>
 #include <cstdio>
 #include <fstream>
 #include <string>
@@ -10,247 +9,195 @@
 #include <cstring>
 #include <tuple>
 
-using IrisTuple = std::tuple<float, float, float, float>;
-using HabermanTuple = std::tuple<float, float, float>;
-using GermanTuple = std::tuple<
-    uint8_t,
-    float,
-    uint8_t,
-    uint8_t,
-    float,
-    uint8_t,
-    uint8_t,
-    float,
-    uint8_t,
-    uint8_t,
-    float,
-    uint8_t,
-    float,
-    uint8_t,
-    uint8_t,
-    float,
-    uint8_t,
-    float,
-    uint8_t,
-    uint8_t
->;
+#include "parsers.h"
+#include "observation.h"
+#include "metric.h"
+#include "knn.h"
+#include "ria.h"
+#include "riona.h"
 
 
-std::vector<std::tuple<float, float, float>> Readfile() {
-    std::ifstream File("./example.csv");
-    std::vector<std::tuple<float, float, float>> data;
-    std::string name;
-    float a;
-    float b;
-    float c;
+std::vector<uint8_t> run_knn(const std::vector<IrisTuple>& X,
+             const std::vector<uint8_t>& y,
+             const std::vector<IrisTuple>& T,
+             size_t k,
+             size_t number_of_classes) {
 
-    while (File >> a >> b >> c) {
-        data.push_back(std::tuple<float, float, float>(a, b, c));
+    auto metup = std::make_tuple(
+        AbsoluteDifference{},
+        AbsoluteDifference{},
+        AbsoluteDifference{},
+        AbsoluteDifference{}
+    );
+
+    Manhattan<decltype(metup), IrisTuple> metric(metup);
+
+    // Prepare dataset
+    std::vector<Observation<IrisTuple>> dataset;
+    for(size_t i = 0; i < X.size(); ++i) {
+        Observation<IrisTuple> obs(y[i], X[i]);
+        dataset.push_back(obs);
     }
-    return data;
+
+    std::vector<uint8_t> result;
+    for (auto& t : T) {
+        auto res = knn(
+            metric,
+            dataset,
+            t,
+            k,
+            number_of_classes
+        );
+
+        result.push_back(res);
+    }
+
+    return result;
 }
 
 
-std::tuple<std::vector<HabermanTuple>,
-           std::vector<uint8_t>> read_haberman() {
+std::vector<uint8_t> run_ria(const std::vector<IrisTuple>& X,
+                             const std::vector<uint8_t>& y,
+                             const std::vector<IrisTuple>& T,
+                             size_t number_of_classes) {
 
-    std::ifstream File("data/haberman.csv");
+    auto metup = std::make_tuple(
+        AbsoluteDifference{},
+        AbsoluteDifference{},
+        AbsoluteDifference{},
+        AbsoluteDifference{}
+    );
 
-    std::vector<HabermanTuple> data_vec;
-    std::vector<uint8_t> cls_vec;
+    Max<decltype(metup), IrisTuple> metric(metup);
 
-    float cls,
-          a,
-          b,
-          c;
-
-    while (File >> cls >> a >> b >> c) {
-        data_vec.push_back(HabermanTuple(a, b, c));
-        cls_vec.push_back((uint8_t) cls);
+    // Prepare dataset
+    std::vector<Observation<IrisTuple>> dataset;
+    for(size_t i = 0; i < X.size(); ++i) {
+        Observation<IrisTuple> obs(y[i], X[i]);
+        dataset.push_back(obs);
     }
-    return std::make_tuple(data_vec, cls_vec);
+
+    std::vector<uint8_t> result;
+    for (auto& t : T) {
+        auto res = ria(
+            metric,
+            dataset,
+            t,
+            number_of_classes
+        );
+
+        result.push_back(res);
+    }
+
+    return result;
+}
+
+std::vector<uint8_t> run_riona(const std::vector<IrisTuple>& X,
+                             const std::vector<uint8_t>& y,
+                             const std::vector<IrisTuple>& T,
+                             size_t k,
+                             size_t number_of_classes) {
+
+    auto metup = std::make_tuple(
+        AbsoluteDifference{},
+        AbsoluteDifference{},
+        AbsoluteDifference{},
+        AbsoluteDifference{}
+    );
+
+
+    Max<decltype(metup), IrisTuple> metric_knn(metup);
+    Max<decltype(metup), IrisTuple> metric_ria(metup);
+
+    // Prepare dataset
+    std::vector<Observation<IrisTuple>> dataset;
+    for(size_t i = 0; i < X.size(); ++i) {
+        Observation<IrisTuple> obs(y[i], X[i]);
+        dataset.push_back(obs);
+    }
+
+    std::vector<uint8_t> result;
+    for (auto& t : T) {
+        auto res = riona(
+            metric_knn,
+            metric_ria,
+            dataset,
+            t,
+            k,
+            number_of_classes
+        );
+
+        result.push_back(res);
+    }
+
+    return result;
 }
 
 
-std::tuple<std::vector<IrisTuple>,
-           std::vector<uint8_t>> read_iris() {
-
-    std::ifstream File("data/iris.csv");
-
-    std::vector<IrisTuple> data_vec;
-    std::vector<uint8_t> cls_vec;
-
-
-    float cls;
-    float d0, d1, d2, d3;
-
-    while (File >> cls >> d0 >> d1 >> d2 >> d3) {
-        data_vec.push_back(IrisTuple(d0, d1, d2, d3));
-        cls_vec.push_back((uint8_t) cls);
-    }
-    return std::make_tuple(data_vec, cls_vec);
-}
-
-
-std::tuple<std::vector<GermanTuple>,
-           std::vector<uint8_t>> read_german() {
-
-    std::ifstream File("data/german.csv");
-
-    std::vector<GermanTuple> data_vec;
-    std::vector<uint8_t> cls_vec;
-
-    float cls;
-    float d0,
-          d1, 
-          d2,
-          d3,
-          d4,
-          d5,
-          d6,
-          d7,
-          d8,
-          d9,
-          d10,
-          d11,
-          d12,
-          d13,
-          d14,
-          d15,
-          d16,
-          d17,
-          d18,
-          d19;
-    /*
-    static_cast<uint8_t>( d0;
-    float d1;
-    static_cast<uint8_t>( d2;
-    static_cast<uint8_t>( d3;
-    float d4;
-    static_cast<uint8_t>( d5;
-    static_cast<uint8_t>( d6;
-    float d7;
-    static_cast<uint8_t>( d8;
-    static_cast<uint8_t>( d9;
-    float d10;
-    static_cast<uint8_t>( d11;
-    float d12;
-    static_cast<uint8_t>( d13;
-    static_cast<uint8_t>( d14;
-    float d15;
-    static_cast<uint8_t>( d16;
-    float d17;
-    static_cast<uint8_t>( d18;
-    static_cast<uint8_t>( d19;
-    */
-
-    while (File >> cls >> 
-            d0 >>    
-            d1 >>    
-            d2 >>    
-            d3 >>    
-            d4 >>    
-            d5 >>    
-            d6 >>    
-            d7 >>    
-            d8 >>    
-            d9 >>    
-            d10 >> 
-            d11 >> 
-            d12 >> 
-            d13 >> 
-            d14 >> 
-            d15 >> 
-            d16 >> 
-            d17 >> 
-            d18 >> 
-            d19
-        ) {
-        data_vec.push_back(GermanTuple(
-        /*
-          d0,
-          d1, 
-          d2,
-          d3,
-          d4,
-          d5,
-          d6,
-          d7,
-          d8,
-          d9,
-          d10,
-          d11,
-          d12,
-          d13,
-          d14,
-          d15,
-          d16,
-          d17,
-          d18,
-          d19
-        */ 
-    (uint8_t) d0,
-    (float)   d1,
-    (uint8_t) d2,
-    (uint8_t) d3,
-    (float)   d4,
-    (uint8_t) d5,
-    (uint8_t) d6,
-    (float)   d7,
-    (uint8_t) d8,
-    (uint8_t) d9,
-    (float)   d10,
-    (uint8_t) d11,
-    (float)   d12,
-    (uint8_t) d13,
-    (uint8_t) d14,
-    (float)   d15,
-    (uint8_t) d16,
-    (float)   d17,
-    (uint8_t) d18,
-    (uint8_t) d19
-
-    /*
-    static_cast<uint8_t>(d0),
-    (float)   d1,
-    static_cast<uint8_t>(d2),
-    static_cast<uint8_t>(d3),
-    (float)   d4,
-    static_cast<uint8_t>(d5),
-    static_cast<uint8_t>(d6),
-    (float)   d7,
-    static_cast<uint8_t>(d8),
-    static_cast<uint8_t>(d9),
-    (float)   d10,
-    static_cast<uint8_t>(d11),
-    (float)   d12,
-    static_cast<uint8_t>(d13),
-    static_cast<uint8_t>(d14),
-    (float)   d15,
-    static_cast<uint8_t>(d16),
-    (float)   d17,
-    static_cast<uint8_t>(d18),
-    static_cast<uint8_t>(d19)
-    */
-        ));
-        cls_vec.push_back((uint8_t) cls);
-    }
-    return std::make_tuple(data_vec, cls_vec);
-}
 int main() {
-    auto df = read_german();
-    auto X = std::get<0>(df); 
-    auto y = std::get<1>(df);
 
-    for (const auto& i : X) {
-       //std::cout << std::get<0>(i) << ", " << std::get<1>(i) << ", " << std::get<2>(i) << ", " << std::endl;
-       //std::cout << std::get<0>(i) << ", " << std::get<1>(i) << ", " << std::get<2>(i) << ", " << std::get<3>(i) << std::endl;
-       printf("%d\n", std::get<0>(i));
-    }
+    const size_t number_of_classes = 3;
 
-    for (const auto& i : y) {
-        //printf("%d\n", i);
+    // Load Train
+    const auto df_train = read_iris("data/iris.csv");
+    const auto X_train = std::get<0>(df_train); 
+    const auto y_train = std::get<1>(df_train);
+
+    // Load Test
+    const auto df_test = read_iris("data/iris.csv");
+    const auto X_test = std::get<0>(df_test); 
+    const auto y_test = std::get<1>(df_test);
+
+    // Verify Loading
+    if (false) {
+      for (size_t i = 0; i < X_train.size(); ++i) {
+        std::cout << (int) y_train[i] << ", " 
+                 << std::get<0>(X_train[i]) << ", "
+                 << std::get<1>(X_train[i]) << ", "
+                 << std::get<2>(X_train[i]) << ", "
+                 << std::get<3>(X_train[i]) << std::endl;
+       }
     }
+    
+    printf("train size: %d\n", (int) X_train.size()); 
+    printf("test size: %d\n", (int) X_test.size()); 
+
+    auto result_knn = run_knn(
+        X_train, y_train, X_test, 1, number_of_classes
+    );
+
+    auto result_ria = run_ria(
+       X_train, y_train, X_test, number_of_classes
+    );
+
+    auto result_riona = run_riona(
+       X_train, y_train, X_test, 10, number_of_classes
+    );
+
+
+    for(auto e : y_test)
+        printf("%d", e);
+    printf("\n");
+
+    for(auto e : result_knn)
+        printf("%d", e);
+    printf("\n");
+
+    for(auto e : result_ria)
+        printf("%d", e);
+    printf("\n");
+    
+    for(auto e : result_riona)
+        printf("%d", e);
+    printf("\n");
+
+    std::ofstream result_file;
+    result_file.open("data/iris_result.csv");
+    for(size_t i = 0; i < X_test.size(); ++i)
+        result_file << (int) y_test[i] << " "
+                    << (int) result_knn[i] << " "
+                    << (int) result_ria[i] << " "
+                    << (int) result_riona[i] << std::endl;
 
     return 0;
 }
