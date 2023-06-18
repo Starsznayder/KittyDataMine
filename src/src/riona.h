@@ -3,16 +3,10 @@
 
 #include <cstdio>
 #include <vector>
-#include <numeric>
 #include <memory>
-//#include <boolean>
-#include <algorithm>
-#include <limits>
 
 #include "metric.h"
 #include "observation.h"
-#include "utils.h"
-#include "rule.h"
 #include "knn.h"
 #include "ria.h"
 
@@ -32,10 +26,9 @@ uint8_t riona(const Metric<T>& metric_knn,
         k
     );
     
-    return __ria(
+    return ria(
         metric_ria,
-        neighbours.data(),
-        neighbours.size(),
+        neighbours,
         test_data, 
         number_of_classes
     );

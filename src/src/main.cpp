@@ -2,7 +2,7 @@
 #include <memory>
 #include "knn.h"
 #include "ria.h"
-// #include "riona.h"
+#include "riona.h"
 #include "observation.h"
 
 void test_ValueDifferenceMetric() {
@@ -162,21 +162,22 @@ void test_riona() {
 
     Max<decltype(metup), decltype(tst)> metric(metup);
 
-    //auto result = riona(
-    //    metric,
-    //    metric,
-    //    dataset,
-    //    tst,
-    //    2,
-    //    2
-    //);
+    auto result = riona(
+        metric,
+        metric,
+        dataset,
+        tst,
+        2,
+        2
+    );
 
-    //printf("%d\n", result);
+    printf("%d\n", result);
     
 }
 
-int main() { // może być tylko 1 main w targecie
+int main() {
     test_knn_Tuples_Max();
     test_knn_Tuples_Manhattan();
     test_ria();
+    test_riona();
 }
