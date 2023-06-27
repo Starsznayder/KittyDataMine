@@ -7,7 +7,7 @@
 
 #include "metric.h"
 #include "observation.h"
-#include "knn.h"
+#include "kpnn.h"
 #include "ria.h"
 
 
@@ -19,7 +19,7 @@ uint8_t riona(const Metric<T>& metric_knn,
               const size_t k,
 			  const size_t number_of_classes) {
     
-    auto neighbours = nearest_neighbours(
+    auto neighbours = plus_nearest_neighbours(
         metric_knn,
         dataset,
         test_data,

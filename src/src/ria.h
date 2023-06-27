@@ -31,16 +31,16 @@ uint8_t ria(const Metric<T>& metric,
 	std::vector<size_t> support_set_count(number_of_classes);	
 	for(auto& observation : dataset) {
         Rule<T> rule(observation.target, metric, observation.data, test_data);
-		if(is_consistent(rule, dataset)) 
+		if(is_consistent(rule, dataset))
 			++support_set_count[static_cast<int>(observation.target)];
     }
-    return (uint8_t) std::distance(
+    return static_cast<uint8_t>(std::distance(
         support_set_count.begin(),
         std::max_element(
-            support_set_count.begin(), 
+            support_set_count.begin(),
             support_set_count.end()
         )
-    ); 
+    )); // Mode 
 }
 
 #endif

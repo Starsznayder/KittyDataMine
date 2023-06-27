@@ -38,8 +38,8 @@ using GermanTuple = std::tuple<
 
 
 
-std::vector<std::tuple<float, float, float>> read_example() {
-    std::ifstream File("./example.csv");
+std::vector<std::tuple<float, float, float>> read_example(std::string path) {
+    std::ifstream File(path);
     std::vector<std::tuple<float, float, float>> data;
     std::string name;
     float a;
@@ -54,9 +54,9 @@ std::vector<std::tuple<float, float, float>> read_example() {
 
 
 std::tuple<std::vector<HabermanTuple>,
-           std::vector<uint8_t>> read_haberman() {
+           std::vector<uint8_t>> read_haberman(std::string path) {
 
-    std::ifstream File("data/haberman.csv");
+    std::ifstream File(path);
 
     std::vector<HabermanTuple> data_vec;
     std::vector<uint8_t> cls_vec;
@@ -95,9 +95,9 @@ std::tuple<std::vector<IrisTuple>,
 
 
 std::tuple<std::vector<GermanTuple>,
-           std::vector<uint8_t>> read_german() {
+           std::vector<uint8_t>> read_german(std::string path) {
 
-    std::ifstream File("data/german.csv");
+    std::ifstream File(path);
 
     std::vector<GermanTuple> data_vec;
     std::vector<uint8_t> cls_vec;

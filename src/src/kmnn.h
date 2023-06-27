@@ -1,5 +1,5 @@
-#ifndef KnnH
-#define KnnH
+#ifndef KmnnH
+#define KmnnH
 
 #include <cstdio>
 #include <vector>
@@ -13,10 +13,10 @@
 #include "observation.h"
 
 template <typename T>
-std::vector<Observation<T>> nearest_neighbours(const Metric<T>& metric,
-                                               const std::vector<Observation<T>>& dataset,
-                                               const T& element,
-                                               const size_t k) {
+std::vector<Observation<T>> minus_nearest_neighbours(const Metric<T>& metric,
+                                                     const std::vector<Observation<T>>& dataset,
+                                                     const T& element,
+                                                     const size_t k) {
 
     std::vector<float> distances(k, std::numeric_limits<float>::infinity());
     std::vector<const Observation<T> *> neighbours(k);
@@ -43,11 +43,11 @@ std::vector<Observation<T>> nearest_neighbours(const Metric<T>& metric,
 }
 
 template <typename T>
-uint8_t knn(const Metric<T>& metric,
-	 		const std::vector<Observation<T>>& dataset, 
-			const T element, 
-			const size_t k,
-			const size_t number_of_classes) {
+uint8_t kmnn(const Metric<T>& metric,
+	 		 const std::vector<Observation<T>>& dataset, 
+			 const T element, 
+			 const size_t k,
+			 const size_t number_of_classes) {
 	auto neighbours = nearest_neighbours(metric, dataset, element, k);
     std::vector<size_t> hist(number_of_classes, 0);
     for(auto& n : neighbours) ++hist[n.target];

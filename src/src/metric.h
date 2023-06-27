@@ -71,7 +71,6 @@ std::array<float, sizeof...(Is)> compute_metrics_helper(const std::tuple<Ms...>&
                                                         const std::tuple<As...>& lhss,
                                                         const std::tuple<As...>& rhss,
                                                         const std::index_sequence<Is...>) {
-	// return std::make_tuple(
     return { compute_metric(std::get<Is>(metrics),
 							std::get<Is>(lhss),
                             std::get<Is>(rhss))... };
