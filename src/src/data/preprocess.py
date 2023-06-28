@@ -10,6 +10,10 @@ def transform_cat(cat):
     ), axis=1)
 
 
+def transform_num(num):
+    return (num - np.mean(num))/np.std(num)
+
+
 def make_table(data, A, B):
     d = data[[A, B]].value_counts()
     Au = sorted(data[A].unique())
@@ -54,29 +58,37 @@ def save_json(name, data):
         file.write(json.dumps(data))
 
 
-data = pd.read_csv('iris.arff', header=None)
-for c in data.columns:
-    print(data[c].dtype)
+data = pd.read_csv('arff/iris.arff', header=None)
+for c in range(len(data.columns)):
+    if c in [4]:
+        data[c] = transform_cat(data[c].to_numpy())
+    else:
+        data[c] = transform_num(data[c].to_numpy())
 data[4] = transform_cat(data[4].to_numpy())
 cols = data.columns.tolist()
 cols = cols[-1:] + cols[:-1]
 data = data[cols]
-data.to_csv('iris.csv', index=False, header=None, sep=' ')
+data.to_csv('csv/iris.csv', index=False, header=None, sep=' ')
 
-data = pd.read_csv('haberman.arff', header=None)
-data[3] = transform_cat(data[3].to_numpy())
-cols = data.columns.tolist()
-cols = cols[-1:] + cols[:-1]
-data = data[cols]
-data.to_csv('haberman.csv', index=False, header=None, sep=' ')
 
-data = pd.read_csv('german.arff', header=None)
-
+data = pd.read_csv('arff/zoo.arff', header=None)
 for c in data.columns:
-    if data[c].dtype == 'O':
-        data[c] = transform_cat(data[c].to_numpy())
-
+    data[c] = transform_cat(data[c].to_numpy())
 cols = data.columns.tolist()
 cols = cols[-1:] + cols[:-1]
 data = data[cols]
-data.to_csv('german.csv', index=False, header=None, sep=' ')
+data.to_csv('csv/zoo.csv', index=False, header=None, sep=' ')
+
+
+data = pd.read_csv('arff/tae.arff', header=None)
+for c in data.columns:
+    print(data[c].dtype)
+for c in range(data.shape[1]):
+    if c in [0, 3, 5]:
+        data[c] = transform_cat(data[c].to_numpy())
+    else:
+        data[c] = transform_num(data[c].to_numpy())
+cols = data.columns.tolist()
+cols = cols[-1:] + cols[:-1]
+data = data[cols]
+data.to_csv('csv/tae.csv', index=False, header=None, sep=' ')

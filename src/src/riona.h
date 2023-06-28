@@ -25,13 +25,38 @@ uint8_t riona(const Metric<T>& metric_knn,
         test_data,
         k
     );
+
+    //printf("\n SIZE: %d \n", (int) neighbours.size());
+
+    if(PRINT_LOG) {
+      printf("\"metadata\": [");
+      for(auto& obs : dataset) {
+
+        bool sw = false;
+        for(auto& ngbr : neighbours)
+            if(ngbr.id == obs.id) { sw = true; break; }
+        if(sw) continue;
+        
+        auto dist = metric_knn(obs.data, test_data);
+        printf(
+            "{\"ngbr_id\": %d, \"decision\": %d, \"distance\": %f, \"consistent\": null, \"decisive\": false}, ",
+            (int) obs.id,
+            (int) obs.target,
+            dist
+        );
+
+      }
+    }
     
-    return ria(
+    auto result = ria(
         metric_ria,
         neighbours,
         test_data, 
         number_of_classes
     );
+
+
+    return result;
 }
 
 #endif

@@ -18,14 +18,17 @@ struct ValueDifference : public Metric<uint8_t> {
     std::vector<std::vector<float>> distances;
 
     ValueDifference(const std::vector<uint8_t>& cls,
-                    const std::vector<uint8_t>& vec) : distances() {
-        uint8_t len_cls = *std::max_element(cls.begin(), cls.end()) + 1; 
-        uint8_t len_vec = *std::max_element(vec.begin(), vec.end()) + 1;
+                    const std::vector<uint8_t>& vec,
+                    const int len_cls,
+                    const int len_vec) : distances() {
+        // uint8_t len_cls = *std::max_element(cls.begin(), cls.end()) + 1; 
+        // uint8_t len_vec = *std::max_element(vec.begin(), vec.end()) + 1;
+
         
         std::vector<std::vector<float>> prob;
-        prob.resize((int) len_vec);
+        prob.resize(len_vec);
         for(size_t i = 0; i < len_vec; ++i)
-            prob[i].resize((int) len_cls, 0);
+            prob[i].resize(len_cls, 0);
         
         for(size_t i = 0; i < cls.size(); ++i)
             prob[vec[i]][cls[i]] += 1.0; 
@@ -35,9 +38,9 @@ struct ValueDifference : public Metric<uint8_t> {
             for(size_t i = 0; i < len_cls; ++i) prob[j][i] /= sum;
         }
 
-        distances.resize((int) len_vec);
+        distances.resize(len_vec);
         for(size_t i = 0; i < len_vec; ++i)
-            distances[i].resize((int) len_vec, 0);
+            distances[i].resize(len_vec, 0);
         
         for(size_t i = 0; i < len_vec; ++i)
             for(size_t j = 0; j < len_vec; ++j)

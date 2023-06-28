@@ -12,6 +12,10 @@
 #include "metric.h"
 #include "observation.h"
 
+#ifndef PRINT_LOG
+#define PRINT_LOG false
+#endif
+
 template <typename T>
 std::vector<Observation<T>> minus_nearest_neighbours(const Metric<T>& metric,
                                                      const std::vector<Observation<T>>& dataset,
@@ -20,6 +24,7 @@ std::vector<Observation<T>> minus_nearest_neighbours(const Metric<T>& metric,
 
     std::vector<float> distances(k, std::numeric_limits<float>::infinity());
     std::vector<const Observation<T> *> neighbours(k);
+
 
     for(auto it = dataset.begin(); it != dataset.end(); ++it) {
         auto new_ngbr = &(*it);
@@ -48,10 +53,35 @@ uint8_t kmnn(const Metric<T>& metric,
 			 const T element, 
 			 const size_t k,
 			 const size_t number_of_classes) {
-	auto neighbours = nearest_neighbours(metric, dataset, element, k);
+	auto neighbours = minus_nearest_neighbours(metric, dataset, element, k);
     std::vector<size_t> hist(number_of_classes, 0);
     for(auto& n : neighbours) ++hist[n.target];
-	return std::max_element(hist.begin(), hist.end()) - hist.begin();
+	auto result =  std::max_element(hist.begin(), hist.end()) - hist.begin();
+
+    if(PRINT_LOG) {
+      printf(
+        " \"prediction\": %d, \"metadata\": [",
+        (int) result
+      );
+      for(auto& obs : dataset) {
+        auto dist = metric(obs.data, element);
+        printf(
+            "{\"ngbr_id\": %d, \"decision\": %d, \"distance\": %f, \"consistent\": null, ",
+            (int) obs.id,
+            (int) obs.target,
+            dist
+            //obs.target == result ? "true" : "false"
+        );
+
+        bool sw = false;
+        for(auto& ngbr : neighbours)
+            if(ngbr.id == obs.id) { sw = true; break; }
+        printf("\"decisive\": %s}, ", sw ? "true" : "false");
+      }
+      printf("\b\b]");
+    }
+
+    return result;
 }
 
 #endif
