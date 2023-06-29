@@ -21,8 +21,6 @@ struct ValueDifference : public Metric<uint8_t> {
                     const std::vector<uint8_t>& vec,
                     const int len_cls,
                     const int len_vec) : distances() {
-        // uint8_t len_cls = *std::max_element(cls.begin(), cls.end()) + 1; 
-        // uint8_t len_vec = *std::max_element(vec.begin(), vec.end()) + 1;
 
         
         std::vector<std::vector<float>> prob;

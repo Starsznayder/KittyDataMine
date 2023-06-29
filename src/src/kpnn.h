@@ -26,7 +26,7 @@ std::vector<Observation<T>> plus_nearest_neighbours(const Metric<T>& metric,
     distances.reserve(dataset.size());
     for(auto obs : dataset) 
         distances.push_back(metric(obs.data, element));
-    
+
     std::vector<float> best_k_distances(k, std::numeric_limits<float>::infinity());
     for(auto distance : distances) {
         size_t i = 0;
@@ -36,9 +36,10 @@ std::vector<Observation<T>> plus_nearest_neighbours(const Metric<T>& metric,
             std::swap(best_k_distances[i], distance);
         }
     }
-
+    
     std::vector<Observation<T>> result;
     auto boundary = best_k_distances[0];
+    
     for(size_t i = 0; i < dataset.size(); ++i)
         if(distances[i] <= boundary)
             result.push_back(dataset[i]);

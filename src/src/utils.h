@@ -5,6 +5,13 @@
 #include <memory>
 #include <algorithm>
 
+template <size_t K, typename T>
+std::vector<uint8_t> nth(std::vector<T> input) {
+    std::vector<uint8_t> output;
+    output.reserve(input.size());
+    for(auto& e : input) output.push_back(std::get<K>(e));
+    return output;
+}
 
 float accuracy(std::vector<uint8_t> target,
                std::vector<uint8_t> prediction) {

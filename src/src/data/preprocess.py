@@ -92,3 +92,12 @@ cols = data.columns.tolist()
 cols = cols[-1:] + cols[:-1]
 data = data[cols]
 data.to_csv('csv/tae.csv', index=False, header=None, sep=' ')
+
+
+data = pd.read_csv('arff/example.arff', header=None)
+for c in data.columns:
+    data[c] = transform_cat(data[c].to_numpy())
+cols = data.columns.tolist()
+cols = cols[-1:] + cols[:-1]
+data = data[cols]
+data.to_csv('csv/example.csv', index=False, header=None, sep=' ')
