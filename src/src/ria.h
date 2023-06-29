@@ -18,16 +18,16 @@
 #endif
 
 
-template <typename T> 
-bool is_consistent(const Rule<T>& rule, const std::vector<Observation<T>> verify_set) {
+template <typename M, typename T> 
+bool is_consistent(const Rule<M, T>& rule, const std::vector<Observation<T>> verify_set) {
 	for(auto& obs : verify_set)
 		if(obs.target != rule.decision && rule(obs.data))
 			return false;
 	return true;	
 }
 
-template <typename T>
-uint8_t ria(const Metric<T>& metric,
+template <typename M, typename T>
+uint8_t ria(const M& metrics,
             const std::vector<Observation<T>>& dataset,
             const T& test_data,
 			const size_t number_of_classes) {
@@ -35,7 +35,7 @@ uint8_t ria(const Metric<T>& metric,
 	std::vector<size_t> support_set_count(number_of_classes);	
     if(PRINT_LOG) printf("\"metadata\": [");
 	for(auto& observation : dataset) {
-        Rule<T> rule(observation.target, metric, observation.data, test_data);
+        Rule<M, T> rule(observation.target, metrics, observation.data, test_data);
         bool consistent = is_consistent(rule, dataset);
         if(PRINT_LOG)
             printf(

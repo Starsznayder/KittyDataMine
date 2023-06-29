@@ -53,8 +53,7 @@ std::tuple<
         AbsoluteDifference{}
     );
 
-    Manhattan<decltype(metup), IrisTuple> metric_knn(metup);
-    Max<decltype(metup), IrisTuple> metric_ria(metup);
+    Manhattan<decltype(metup), IrisTuple> metric(metup);
 
     std::vector<uint8_t> result_kmnn;
     std::vector<uint8_t> result_kpnn;
@@ -76,7 +75,7 @@ std::tuple<
         if(PRINT_LOG) printf("{");
         if(PRINT_LOG) printf("\"kmnn\": {\"target\": %d, ", (int) y[i]);
         result_kmnn.push_back(kmnn(
-            metric_knn,
+            metric,
             dataset,
             test_obs,
             k,
@@ -86,7 +85,7 @@ std::tuple<
         
         if(PRINT_LOG) printf("\"kpnn\": {\"target\": %d, ", (int) y[i]);
         result_kpnn.push_back(kpnn(
-            metric_knn,
+            metric,
             dataset,
             test_obs,
             k,
@@ -96,7 +95,7 @@ std::tuple<
 
         if(PRINT_LOG) printf("\"ria\": {\"target\": %d, \"metadata\": [", (int) y[i]);
         result_ria.push_back(ria(
-            metric_ria,
+            metup,
             dataset,
             test_obs,
             number_of_classes
@@ -105,8 +104,8 @@ std::tuple<
 
         if(PRINT_LOG) printf("\"riona\": {\"target\": %d, \"metadata\": [", (int) y[i]);
         result_riona.push_back(riona(
-            metric_knn,
-            metric_ria,
+            metric,
+            metup,
             dataset,
             test_obs,
             k,

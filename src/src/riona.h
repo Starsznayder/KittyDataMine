@@ -11,22 +11,20 @@
 #include "ria.h"
 
 
-template <typename T>
-uint8_t riona(const Metric<T>& metric_knn,
-              const Metric<T>& metric_ria,
+template <typename M, typename T>
+uint8_t riona(const Metric<T>& metric,
+              const M& metup,
               const std::vector<Observation<T>>& dataset,
               const T& test_data,
               const size_t k,
 			  const size_t number_of_classes) {
     
     auto neighbours = plus_nearest_neighbours(
-        metric_knn,
+        metric,
         dataset,
         test_data,
         k
     );
-
-    //printf("\n SIZE: %d \n", (int) neighbours.size());
 
     if(PRINT_LOG) {
       printf("\"metadata\": [");
@@ -37,7 +35,7 @@ uint8_t riona(const Metric<T>& metric_knn,
             if(ngbr.id == obs.id) { sw = true; break; }
         if(sw) continue;
         
-        auto dist = metric_knn(obs.data, test_data);
+        auto dist = metric(obs.data, test_data);
         printf(
             "{\"ngbr_id\": %d, \"decision\": %d, \"distance\": %f, \"consistent\": null, \"decisive\": false}, ",
             (int) obs.id,
@@ -49,12 +47,11 @@ uint8_t riona(const Metric<T>& metric_knn,
     }
     
     auto result = ria(
-        metric_ria,
+        metup,
         neighbours,
         test_data, 
         number_of_classes
     );
-
 
     return result;
 }
