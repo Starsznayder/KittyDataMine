@@ -11,13 +11,12 @@
 #include "ria.h"
 
 
-template <typename M, typename T>
+template <typename M, typename T, size_t number_of_classes>
 uint8_t riona(const Metric<T>& metric,
               const M& metup,
               const std::vector<Observation<T>>& dataset,
               const T& test_data,
-              const size_t k,
-			  const size_t number_of_classes) {
+              const size_t k) {
     
     auto neighbours = plus_nearest_neighbours(
         metric,
@@ -26,31 +25,10 @@ uint8_t riona(const Metric<T>& metric,
         k
     );
 
-    if(PRINT_LOG) {
-      printf("\"metadata\": [");
-      for(auto& obs : dataset) {
-
-        bool sw = false;
-        for(auto& ngbr : neighbours)
-            if(ngbr.id == obs.id) { sw = true; break; }
-        if(sw) continue;
-        
-        auto dist = metric(obs.data, test_data);
-        printf(
-            "{\"ngbr_id\": %d, \"decision\": %d, \"distance\": %f, \"consistent\": null, \"decisive\": false}, ",
-            (int) obs.id,
-            (int) obs.target,
-            dist
-        );
-
-      }
-    }
-    
     auto result = ria(
         metup,
         neighbours,
-        test_data, 
-        number_of_classes
+        test_data
     );
 
     return result;

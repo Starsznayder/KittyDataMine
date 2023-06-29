@@ -30,17 +30,19 @@ std::vector<Observation<T>> plus_nearest_neighbours(const Metric<T>& metric,
     std::vector<float> best_k_distances(k, std::numeric_limits<float>::infinity());
     for(auto distance : distances) {
         size_t i = 0;
-        while(i < k && distance < best_k_distances[i]) i++;
-        for(; i > 0; --i) std::swap(best_k_distances[i], distance);
+        while(i < k && distance < best_k_distances[i]) ++i;
+        while(i > 0) {
+            --i;
+            std::swap(best_k_distances[i], distance);
+        }
     }
-    
+
     std::vector<Observation<T>> result;
-    auto boundary = best_k_distances.back();
+    auto boundary = best_k_distances[0];
     for(size_t i = 0; i < dataset.size(); ++i)
-        if (distances[i] <= boundary)
+        if(distances[i] <= boundary)
             result.push_back(dataset[i]);
-    return result;
-    
+    return result;    
 }
 
 template <typename T>
@@ -53,13 +55,9 @@ uint8_t kpnn(const Metric<T>& metric,
     std::vector<size_t> hist(number_of_classes, 0);
     for(auto& n : neighbours) ++hist[n.target];
 
-	uint8_t result = std::max_element(hist.begin(), hist.end()) - hist.begin();
+	auto result = std::max_element(hist.begin(), hist.end()) - hist.begin();
 
     if(PRINT_LOG) {
-      printf(
-        " \"prediction\": %d, \"metadata\": [",
-        (int) result
-      );
       for(auto& obs : dataset) {
         auto dist = metric(obs.data, element);
         printf(
@@ -74,7 +72,8 @@ uint8_t kpnn(const Metric<T>& metric,
             if(ngbr.id == obs.id) { sw = true; break; }
         printf("\"decisive\": %s}, ", sw ? "true" : "false");
       }
-      printf("\b\b]");
+      printf("\b\b], ");
+      printf("\"prediction\": %d", (int) result);
     }
 
     return result;

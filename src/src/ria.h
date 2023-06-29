@@ -33,10 +33,14 @@ uint8_t ria(const M& metrics,
 			const size_t number_of_classes) {
 	
 	std::vector<size_t> support_set_count(number_of_classes);	
-    if(PRINT_LOG) printf("\"metadata\": [");
+    // if(PRINT_LOG) printf("\"metadata\": [");
 	for(auto& observation : dataset) {
         Rule<M, T> rule(observation.target, metrics, observation.data, test_data);
         bool consistent = is_consistent(rule, dataset);
+		if(consistent)
+			++support_set_count[static_cast<int>(observation.target)];
+
+
         if(PRINT_LOG)
             printf(
                 "{\"ngbr_id\": %d, \"decision\": %d, \"distance\": null, \"consistent\": %s, \"decisive\": true}, ",
@@ -44,8 +48,6 @@ uint8_t ria(const M& metrics,
                 (int) observation.target,
                 consistent ? "true" : "false"
             );
-		if(consistent)
-			++support_set_count[static_cast<int>(observation.target)];
     }
 
     uint8_t result = std::distance(

@@ -59,10 +59,6 @@ uint8_t kmnn(const Metric<T>& metric,
 	auto result =  std::max_element(hist.begin(), hist.end()) - hist.begin();
 
     if(PRINT_LOG) {
-      printf(
-        " \"prediction\": %d, \"metadata\": [",
-        (int) result
-      );
       for(auto& obs : dataset) {
         auto dist = metric(obs.data, element);
         printf(
@@ -78,7 +74,8 @@ uint8_t kmnn(const Metric<T>& metric,
             if(ngbr.id == obs.id) { sw = true; break; }
         printf("\"decisive\": %s}, ", sw ? "true" : "false");
       }
-      printf("\b\b]");
+      printf("\b\b], ");
+      printf("\"prediction\": %d", (int) result);
     }
 
     return result;

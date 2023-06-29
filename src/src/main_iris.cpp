@@ -73,7 +73,7 @@ std::tuple<
         }
         
         if(PRINT_LOG) printf("{");
-        if(PRINT_LOG) printf("\"kmnn\": {\"target\": %d, ", (int) y[i]);
+        if(PRINT_LOG) printf("\"kmnn\": {\"target\": %d, \"metadata\": [", (int) y[i]);
         result_kmnn.push_back(kmnn(
             metric,
             dataset,
@@ -81,9 +81,9 @@ std::tuple<
             k,
             number_of_classes
         ));
-        if(PRINT_LOG) printf("\b\b},");
+        if(PRINT_LOG) printf("},\n");
         
-        if(PRINT_LOG) printf("\"kpnn\": {\"target\": %d, ", (int) y[i]);
+        if(PRINT_LOG) printf("\"kpnn\": {\"target\": %d, \"metadata\": [", (int) y[i]);
         result_kpnn.push_back(kpnn(
             metric,
             dataset,
@@ -91,7 +91,7 @@ std::tuple<
             k,
             number_of_classes
         ));
-        if(PRINT_LOG) printf("\b\b}, ");
+        if(PRINT_LOG) printf("},\n");
 
         if(PRINT_LOG) printf("\"ria\": {\"target\": %d, \"metadata\": [", (int) y[i]);
         result_ria.push_back(ria(
@@ -100,7 +100,7 @@ std::tuple<
             test_obs,
             number_of_classes
         ));
-        if(PRINT_LOG) printf("}, ");
+        if(PRINT_LOG) printf("},\n");
 
         if(PRINT_LOG) printf("\"riona\": {\"target\": %d, \"metadata\": [", (int) y[i]);
         result_riona.push_back(riona(
@@ -165,7 +165,7 @@ int main() {
     printf("\"ria\": %f,\n",  balanced_accuracy(y, result_ria, number_of_classes));
     printf("\"riona\": %f\n", balanced_accuracy(y, result_riona, number_of_classes));
     
-    printf("},\n");
+    printf("}\n");
     printf("},\n");
 
     printf("\"predictions\": {\n");
@@ -187,7 +187,7 @@ int main() {
 
     printf("\"riona\": [");
     for(size_t i = 0; i < y.size(); ++i)
-        printf(i+1 == y.size() ? "%d],\n" : "%d, ", result_riona[i]);
+        printf(i+1 == y.size() ? "%d]\n" : "%d, ", result_riona[i]);
 
     printf("}\n");
     printf("}\n");

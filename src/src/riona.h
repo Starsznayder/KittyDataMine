@@ -27,7 +27,7 @@ uint8_t riona(const Metric<T>& metric,
     );
 
     if(PRINT_LOG) {
-      printf("\"metadata\": [");
+      // printf("\"metadata\": [");
       for(auto& obs : dataset) {
 
         bool sw = false;
