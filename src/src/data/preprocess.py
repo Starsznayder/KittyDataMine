@@ -19,12 +19,26 @@ def make_table(data, A, B):
     Au = sorted(data[A].unique())
     Bu = sorted(data[B].unique())
     return {
-        a: [d.get((a, b), 0) for b in Bu]
+        int(a): [int(d.get((a, b), 0)) for b in Bu]
         for a in Au
     }
 
 
-def make_stats(file_name, data, target=0):
+class NpEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        if isinstance(obj, np.int64):
+            return int(obj)
+        if isinstance(obj, np.floating):
+            return float(obj)
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return super(NpEncoder, self).default(obj)
+
+
+def make_stats(file_name, data, categorical, target=0):
+    data.columns = list(range(len(data.columns)))
     return {
         'file_name': file_name.replace('arff', 'csv'),
         'number_of_observations': data.shape[0],
@@ -32,21 +46,21 @@ def make_stats(file_name, data, target=0):
         'decision_attribute_position': np.argmax(data.columns == target) + 1,
         'attributes': {
             name: {
-                'type': ['categorical', 'numerical'][data[name].dtype == 'object'],
-                'stats': {
-                    'min': data[name].min(),
-                    'max': data[name].max(),
-                } if data[name].dtype != 'object' else {
-                    **{
-                        str(value): count
+                'type': ['numerical', 'categorical'][int(name) in categorical],
+                'stats': ({
+                    'min': float(data[name].min()),
+                    'max': float(data[name].max()),
+                } if int(name) not in categorical else {
+                    'counts': {
+                        str(value): int(count)
                         for value, count in data[name].value_counts().items()
                     },
                     'table': make_table(
                         data,
                         name,
                         target,
-                    ),
-                },
+                    ) if name != target else None,
+                }),
             }
             for name in data.columns
         }
@@ -55,7 +69,7 @@ def make_stats(file_name, data, target=0):
 
 def save_json(name, data):
     with open(name, 'w') as file:
-        file.write(json.dumps(data))
+        file.write(json.dumps(data, cls=NpEncoder))
 
 
 data = pd.read_csv('arff/iris.arff', header=None)
@@ -69,6 +83,7 @@ cols = data.columns.tolist()
 cols = cols[-1:] + cols[:-1]
 data = data[cols]
 data.to_csv('csv/iris.csv', index=False, header=None, sep=' ')
+save_json('stats/iris.json', make_stats('iris.csv', data, [0]))
 
 
 data = pd.read_csv('arff/zoo.arff', header=None)
@@ -78,11 +93,10 @@ cols = data.columns.tolist()
 cols = cols[-1:] + cols[:-1]
 data = data[cols]
 data.to_csv('csv/zoo.csv', index=False, header=None, sep=' ')
+save_json('stats/zoo.json', make_stats('zoo.csv', data, list(range(20))))
 
 
 data = pd.read_csv('arff/tae.arff', header=None)
-for c in data.columns:
-    print(data[c].dtype)
 for c in range(data.shape[1]):
     if c in [0, 3, 5]:
         data[c] = transform_cat(data[c].to_numpy())
@@ -92,6 +106,7 @@ cols = data.columns.tolist()
 cols = cols[-1:] + cols[:-1]
 data = data[cols]
 data.to_csv('csv/tae.csv', index=False, header=None, sep=' ')
+save_json('stats/tae.json', make_stats('tae.csv', data, [0, 1, 4]))
 
 
 data = pd.read_csv('arff/example.arff', header=None)
@@ -104,3 +119,4 @@ cols = data.columns.tolist()
 cols = cols[-1:] + cols[:-1]
 data = data[cols]
 data.to_csv('csv/example.csv', index=False, header=None, sep=' ')
+save_json('stats/example.json', make_stats('example.csv', data, [0, 3, 4]))
