@@ -10,10 +10,12 @@
 #include <tuple>
 #include <boost/algorithm/string/replace.hpp>
 
+
 enum class DataSets: uint8_t
 {
     HORSE = 0
 };
+
 
 template<DataSets T>
 struct DataSetsParameters
@@ -21,6 +23,7 @@ struct DataSetsParameters
     static constexpr char* path = "\0";
     using DataType = std::tuple<>;
 };
+
 
 template<>
 struct DataSetsParameters<DataSets::HORSE>

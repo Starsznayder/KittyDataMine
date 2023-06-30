@@ -14,7 +14,7 @@ int main()
    // for (unsigned i = 0; i < minmax.minOfFields.size(); ++i)
   // }
   //  std::vector<std::vector<unsigned>> numberOfOccurrences = Statistics<SELECTED_SET>::getNumberOfOccurrences(*data, minmax);
-	std::cout << "DUPA" << std::endl;
+    
     return 0;
 }
 	
