@@ -1,0 +1,53 @@
+
+# Files
+.
+├── data
+│   ├── arff
+│   │   ├── example.arff
+│   │   ├── iris.arff
+│   │   ├── tae.arff
+│   │   └── zoo.arff
+│   ├── csv
+│   │   ├── example.csv
+│   │   ├── iris.csv
+│   │   ├── tae.csv
+│   │   └── zoo.csv
+│   ├── preprocess.py
+│   └── stats
+│       ├── example.json
+│       ├── iris.json
+│       ├── tae.json
+│       └── zoo.json
+├── main_example.cpp # Mains 
+├── main_iris.cpp
+├── main_tae.cpp
+├── main_zoo.cpp
+│
+├── kmnn.h # Library
+├── kpnn.h
+├── metric.h
+├── observation.h
+├── ria.h    
+├── riona.h  
+├── rule.h
+├── utils.h
+│
+├── Results.ipynb # Plots
+│
+├── example  # Executives
+├── iris
+├── tae
+└── zoo
+
+# Result Reproduction
+
+```bash
+g++ -std=c++2a main_iris.cpp -o iris
+g++ -std=c++2a main_example.cpp -o example
+g++ -std=c++2a main_tae.cpp -o tae
+g++ -std=c++2a main_zoo.cpp -o zoo
+./zoo > results/zoo.json
+./tae > results/tae.json
+./example > results/example.json
+./iris > results/iris.json
+```
